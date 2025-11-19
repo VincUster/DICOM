@@ -4,6 +4,43 @@ import numpy as np
 from tkinter import Tk, Canvas
 from PIL import Image, ImageTk
 
+
+
+def on_press(event):
+    global start_x, start_y, rect
+    start_x, start_y = event.x, event.y
+
+    if rect:
+        canvas.delete(rect)
+    rect = canvas.create_rectangle(start_x, start_y, start_x, start_y,
+                                   outline="red", width=2)
+
+
+def on_drag(event):
+    global rect
+    # live update of rectangle
+    canvas.coords(rect, start_x, start_y, event.x, event.y)
+
+
+def on_release(event):
+    global final_coords
+    x1, y1 = start_x, start_y
+    x2, y2 = event.x, event.y
+
+    # normalize (x1 < x2, y1 < y2)
+    x1, x2 = sorted((x1, x2))
+    y1, y2 = sorted((y1, y2))
+
+    # clip to image bounds
+    x1 = max(0, min(cols, x1))
+    x2 = max(0, min(cols, x2))
+    y1 = max(0, min(rows, y1))
+    y2 = max(0, min(rows, y2))
+
+    final_coords = (int(x1), int(y1), int(x2), int(y2))
+    print("Selected area (x1, y1, x2, y2):", final_coords)
+
+
 # --- Load DICOM ---
 dcm_path = '//supad12.spitaluster.ch/private$/HomeDrives/vescovi1/Documents/DICOM/-US-1-93.dcm'
 dcm_file = pydicom.dcmread(dcm_path)
@@ -41,40 +78,6 @@ start_x = start_y = 0
 rect = None
 final_coords = None  # (x1, y1, x2, y2)
 
-
-def on_press(event):
-    global start_x, start_y, rect
-    start_x, start_y = event.x, event.y
-
-    if rect:
-        canvas.delete(rect)
-    rect = canvas.create_rectangle(start_x, start_y, start_x, start_y,
-                                   outline="red", width=2)
-
-
-def on_drag(event):
-    global rect
-    # live update of rectangle
-    canvas.coords(rect, start_x, start_y, event.x, event.y)
-
-
-def on_release(event):
-    global final_coords
-    x1, y1 = start_x, start_y
-    x2, y2 = event.x, event.y
-
-    # normalize (x1 < x2, y1 < y2)
-    x1, x2 = sorted((x1, x2))
-    y1, y2 = sorted((y1, y2))
-
-    # clip to image bounds
-    x1 = max(0, min(cols, x1))
-    x2 = max(0, min(cols, x2))
-    y1 = max(0, min(rows, y1))
-    y2 = max(0, min(rows, y2))
-
-    final_coords = (int(x1), int(y1), int(x2), int(y2))
-    print("Selected area (x1, y1, x2, y2):", final_coords)
 
 
 canvas.bind("<Button-1>", on_press)
