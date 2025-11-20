@@ -43,6 +43,8 @@ def on_release(event):
 
 # --- Load DICOM ---
 dcm_path = '//supad12.spitaluster.ch/private$/HomeDrives/vescovi1/Documents/DICOM/-US-1-93.dcm'
+
+
 dcm_file = pydicom.dcmread(dcm_path)
 pixel_array = dcm_file.pixel_array.copy()  # work on a copy
 
@@ -108,3 +110,5 @@ if final_coords is not None:
     print("Saved modified DICOM as output.dcm")
 else:
     print("No area selected – DICOM not modified.")
+
+
