@@ -118,7 +118,7 @@ coords = anonymizer.get_coordinates_to_anonymize()
 print("Returned coords:", coords)
 
 # Example of applying to all files once coords are chosen:
-"""
+
 if coords is not None:
     x1, y1, x2, y2 = coords
 
@@ -126,18 +126,21 @@ if coords is not None:
         filepath = os.path.join(dcm_dir, filename)
 
         dcm_file = pydicom.dcmread(filepath)
-        pixel_array = dcm_file.pixel_array.copy()  # work on a copy
 
-        # zero out selected region
-        if pixel_array.ndim == 3:
-            pixel_array[y1:y2, x1:x2, :] = 0
-        else:
-            pixel_array[y1:y2, x1:x2] = 0
+        if dcm_file.SOPClassUID == '1.2.840.10008.5.1.4.1.1.6.1':
 
-        pixel_array = np.asarray(pixel_array, dtype=dcm_file.pixel_array.dtype)
-        dcm_file.PixelData = pixel_array.tobytes()
+            pixel_array = dcm_file.pixel_array.copy()  # work on a copy
 
-        out_path = os.path.join(out_dir, filename)
-        dcm_file.save_as(out_path)
-"""
+            # zero out selected region
+            if pixel_array.ndim == 3:
+                pixel_array[y1:y2, x1:x2, :] = 0
+            else:
+                pixel_array[y1:y2, x1:x2] = 0
+
+            pixel_array = np.asarray(pixel_array, dtype=dcm_file.pixel_array.dtype)
+            dcm_file.PixelData = pixel_array.tobytes()
+
+            out_path = os.path.join(out_dir, filename)
+            dcm_file.save_as(out_path)
+            print(f'{filename} ✅')
 
