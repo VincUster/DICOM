@@ -1,0 +1,11 @@
+pyinstaller --onefile --clean --strip Neueintritte.py
+venv\Scripts\pyinstaller.exe --onefile .\orthopädie\Erweiterung_Berichtscontrolling.py
+
+Setup pyinstaller:
+pip install --no-deps --no-build-isolation pyinstaller-6.14.2-py3-none-win_amd64.whl
+pip install altgraph packaging>=22.0 pefile pyinstaller-hooks-contrib pywin32-ctypes
+
+
+
+pip install pyinstaller
+python -m PyInstaller --onefile --clean --strip .\Neueintritte.py
