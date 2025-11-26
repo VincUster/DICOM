@@ -109,7 +109,6 @@ root = Tk()
 root.withdraw()
 dcm_dir = askdirectory(title="Select a directory")
 root.destroy()
-dcm_dir = 'I:/ICT/03_Applikationsmanagement/96_DICOM_Korrektur/Gervasio_S_2025-11-01_Schwangerschaft-Ultraschall_do3344388'
 
 out_dir = os.path.join(os.path.dirname(dcm_dir), 'anonymized')
 os.makedirs(out_dir, exist_ok=True)
