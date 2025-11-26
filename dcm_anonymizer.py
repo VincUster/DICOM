@@ -2,8 +2,11 @@ import pydicom
 import numpy as np
 
 from tkinter import Tk, Canvas
+from tkinter.filedialog import  askdirectory
 from PIL import Image, ImageTk
 import os
+
+import promptlib
 
 
 class DicomAnonymizer:
@@ -104,8 +107,32 @@ class DicomAnonymizer:
 
 
 # --- usage ---
+"""
+import tkinter as tk
+from tkinter import filedialog
+def select_folder():
+    # Create a temporary hidden root
+    temp_root = tk.Tk()
+    temp_root.withdraw()
 
-dcm_dir = '//supad12.spitaluster.ch/private$/HomeDrives/vescovi1/Documents/DICOM/DICOM-TEMP/Patient Anonymized-rDuKSMI/Schwangerschaft-Ultraschall-20251103-826'
+    folder_path = filedialog.askdirectory(parent=temp_root)
+
+    # Destroy temp root so it doesn't interfere with the main Tk app
+    temp_root.destroy()
+
+    return folder_path
+# Example usage
+#dcm_dir = select_folder()
+#print("Selected folder:", dcm_dir)
+
+prompter = promptlib.Files()
+
+dcm_dir = prompter.dir()
+
+#test = select_folder()
+"""
+
+dcm_dir = 'I:/ICT/03_Applikationsmanagement/96_DICOM_Korrektur/Gervasio_S_2025-11-01_Schwangerschaft-Ultraschall_do3344388'
 
 out_dir = os.path.join(os.path.dirname(dcm_dir), 'anonymized')
 os.makedirs(out_dir, exist_ok=True)
@@ -118,12 +145,14 @@ coords = anonymizer.get_coordinates_to_anonymize()
 print("Returned coords:", coords)
 
 # Example of applying to all files once coords are chosen:
-
+i = 0
 if coords is not None:
     x1, y1, x2, y2 = coords
 
     for filename in os.listdir(dcm_dir):
         filepath = os.path.join(dcm_dir, filename)
+        print(i)
+        i+=1
 
         dcm_file = pydicom.dcmread(filepath)
 

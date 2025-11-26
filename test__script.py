@@ -1,7 +1,7 @@
 import pydicom
 import numpy as np
 
-from tkinter import Tk, Canvas
+from tkinter import Tk, Canvas, filedialog
 from PIL import Image, ImageTk
 
 
