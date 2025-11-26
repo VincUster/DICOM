@@ -5,7 +5,6 @@ from tkinter import Tk, Canvas
 from tkinter.filedialog import  askdirectory
 from PIL import Image, ImageTk
 import os
-
 import promptlib
 
 
@@ -106,32 +105,10 @@ class DicomAnonymizer:
         return self.final_coords
 
 
-# --- usage ---
-"""
-import tkinter as tk
-from tkinter import filedialog
-def select_folder():
-    # Create a temporary hidden root
-    temp_root = tk.Tk()
-    temp_root.withdraw()
-
-    folder_path = filedialog.askdirectory(parent=temp_root)
-
-    # Destroy temp root so it doesn't interfere with the main Tk app
-    temp_root.destroy()
-
-    return folder_path
-# Example usage
-#dcm_dir = select_folder()
-#print("Selected folder:", dcm_dir)
-
-prompter = promptlib.Files()
-
-dcm_dir = prompter.dir()
-
-#test = select_folder()
-"""
-
+root = Tk()
+root.withdraw()
+dcm_dir = askdirectory(title="Select a directory")
+root.destroy()
 dcm_dir = 'I:/ICT/03_Applikationsmanagement/96_DICOM_Korrektur/Gervasio_S_2025-11-01_Schwangerschaft-Ultraschall_do3344388'
 
 out_dir = os.path.join(os.path.dirname(dcm_dir), 'anonymized')
