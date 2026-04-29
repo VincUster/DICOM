@@ -7,6 +7,7 @@ from PIL import Image, ImageTk
 import os
 import promptlib
 from pydicom.uid import ExplicitVRLittleEndian
+from pydicom.uid import JPEG2000Lossless
 
 
 class DicomAnonymizer:
@@ -155,34 +156,44 @@ if coords is not None:
 
 
         elif dcm_file.SOPClassUID == '1.2.840.10008.5.1.4.1.1.3.1':
+            """
+            orig_ts = dcm_file.file_meta.TransferSyntaxUID
+            was_compressed = orig_ts.is_compressed
 
-                was_compressed = dcm_file.file_meta.TransferSyntaxUID.is_compressed
+            if was_compressed:
+                dcm_file.decompress()
 
-                if was_compressed:
-                    dcm_file.decompress()
+               """ 
+            frames = dcm_file.pixel_array.copy()
+            
 
-                frames = dcm_file.pixel_array.copy()
+            # Mask only the pixel region
+            if frames.ndim == 4:          # frames, rows, cols, samples
+                frames[:, y1:y2, x1:x2, :] = 0
+            elif frames.ndim == 3:        # frames, rows, cols
+                frames[:, y1:y2, x1:x2] = 0
+            elif frames.ndim == 2:        # single frame fallback
+                frames[y1:y2, x1:x2] = 0
+            else:
+                raise ValueError(f"Unexpected pixel array shape: {frames.shape}")
 
-                # Mask only the pixel region
-                if frames.ndim == 4:          # frames, rows, cols, samples
-                    frames[:, y1:y2, x1:x2, :] = 0
-                elif frames.ndim == 3:        # frames, rows, cols
-                    frames[:, y1:y2, x1:x2] = 0
-                elif frames.ndim == 2:        # single frame fallback
-                    frames[y1:y2, x1:x2] = 0
-                else:
-                    raise ValueError(f"Unexpected pixel array shape: {frames.shape}")
+            dcm_file.PixelData = frames.tobytes()
 
-                dcm_file.PixelData = frames.tobytes()
+            # Keep metadata consistent
+            dcm_file.Rows = frames.shape[-3] if frames.ndim == 4 else frames.shape[-2]
+            dcm_file.Columns = frames.shape[-2] if frames.ndim == 4 else frames.shape[-1]
 
-                # Keep metadata consistent
-                dcm_file.Rows = frames.shape[-3] if frames.ndim == 4 else frames.shape[-2]
-                dcm_file.Columns = frames.shape[-2] if frames.ndim == 4 else frames.shape[-1]
+            # Recompress near original size
+            """
+            from pydicom.uid import JPEG2000
+            if was_compressed:
+                dcm_file.compress(JPEG2000, j2k_cr=[30])
+            """
 
-                out_path = os.path.join(out_dir, filename)
-                dcm_file.save_as(out_path, write_like_original=False)
+            out_path = os.path.join(out_dir, filename)
+            dcm_file.save_as(out_path, write_like_original=False)
 
-                print(f'{filename} ✅')
+            print(f'{filename} ✅')
 
         else:
             print(f'{dcm_file.dcm_file.SOPClassUID}')
