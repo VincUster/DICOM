@@ -6,6 +6,7 @@ from tkinter.filedialog import  askdirectory
 from PIL import Image, ImageTk
 import os
 import promptlib
+from pydicom.uid import ExplicitVRLittleEndian
 
 
 class DicomAnonymizer:
@@ -148,4 +149,44 @@ if coords is not None:
             out_path = os.path.join(out_dir, filename)
             dcm_file.save_as(out_path)
             print(f'{filename} ✅')
+
+
+
+
+
+        elif dcm_file.SOPClassUID == '1.2.840.10008.5.1.4.1.1.3.1':
+
+                was_compressed = dcm_file.file_meta.TransferSyntaxUID.is_compressed
+
+                if was_compressed:
+                    dcm_file.decompress()
+
+                frames = dcm_file.pixel_array.copy()
+
+                # Mask only the pixel region
+                if frames.ndim == 4:          # frames, rows, cols, samples
+                    frames[:, y1:y2, x1:x2, :] = 0
+                elif frames.ndim == 3:        # frames, rows, cols
+                    frames[:, y1:y2, x1:x2] = 0
+                elif frames.ndim == 2:        # single frame fallback
+                    frames[y1:y2, x1:x2] = 0
+                else:
+                    raise ValueError(f"Unexpected pixel array shape: {frames.shape}")
+
+                dcm_file.PixelData = frames.tobytes()
+
+                # Keep metadata consistent
+                dcm_file.Rows = frames.shape[-3] if frames.ndim == 4 else frames.shape[-2]
+                dcm_file.Columns = frames.shape[-2] if frames.ndim == 4 else frames.shape[-1]
+
+                out_path = os.path.join(out_dir, filename)
+                dcm_file.save_as(out_path, write_like_original=False)
+
+                print(f'{filename} ✅')
+
+        else:
+            print(f'{dcm_file.dcm_file.SOPClassUID}')
+
+
+            
 
